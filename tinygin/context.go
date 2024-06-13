@@ -54,7 +54,7 @@ func (c *Context) SetHeader(key string, value string) {
 func (c *Context) String(code int, format string, values ...interface{}) {
 	c.SetHeader("Content-Type", "text/plain")
 	c.Status(code)
-	c.Writer.Write([]byte(fmt.Sprintf(format, values...)))
+	fmt.Fprintf(c.Writer, format, values...)
 }
 
 func (c *Context) JSON(code int, obj interface{}) {

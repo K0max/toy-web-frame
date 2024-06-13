@@ -17,8 +17,8 @@ type Engine struct {
 
 type RouterGroup struct {
 	prefix      string
-	middlewares []HandlerFunc
 	engine      *Engine
+	middlewares []HandlerFunc
 }
 
 // New is the constructor of gee.Engine
