@@ -1,6 +1,7 @@
 package tinygin
 
 import (
+	"log"
 	"net/http"
 )
 
@@ -9,6 +10,7 @@ type HandlerFunc func(*Context)
 
 // Engine implement the interface of ServeHTTP
 type Engine struct {
+	*RouterGroup
 	router *router
 	groups []*RouterGroup
 }
@@ -16,13 +18,15 @@ type Engine struct {
 type RouterGroup struct {
 	prefix      string
 	middlewares []HandlerFunc
-	parent      *RouterGroup
 	engine      *Engine
 }
 
 // New is the constructor of gee.Engine
 func New() *Engine {
-	return &Engine{router: newRouter()}
+	engine := &Engine{router: newRouter()}
+	engine.RouterGroup = &RouterGroup{engine: engine}
+	engine.groups = []*RouterGroup{engine.RouterGroup}
+	return engine
 }
 
 func (engine *Engine) addRoute(method string, pattern string, handler HandlerFunc) {
@@ -47,4 +51,28 @@ func (engine *Engine) Run(addr string) (err error) {
 func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	c := newContext(w, req)
 	engine.router.handler(c)
+}
+
+func (g *RouterGroup) Group(prefix string) *RouterGroup {
+	engine := g.engine
+	newGroup := &RouterGroup{
+		prefix: g.prefix + prefix,
+		engine: engine,
+	}
+	engine.groups = append(engine.groups, newGroup)
+	return newGroup
+}
+
+func (g *RouterGroup) addRoute(method string, comp string, handler HandlerFunc) {
+	pattern := g.prefix + comp
+	g.engine.router.addRoute(method, pattern, handler)
+	log.Printf("Route %4s - %s", method, pattern)
+}
+
+func (g *RouterGroup) GET(pattern string, handler HandlerFunc) {
+	g.addRoute("GET", pattern, handler)
+}
+
+func (g *RouterGroup) POST(pattern string, handler HandlerFunc) {
+	g.addRoute("POST", pattern, handler)
 }
