@@ -3,6 +3,7 @@ package tinygin
 import (
 	"log"
 	"net/http"
+	"strings"
 )
 
 // HandlerFunc defines the request handler used by gee
@@ -75,4 +76,20 @@ func (g *RouterGroup) GET(pattern string, handler HandlerFunc) {
 
 func (g *RouterGroup) POST(pattern string, handler HandlerFunc) {
 	g.addRoute("POST", pattern, handler)
+}
+
+func (g *RouterGroup) Use(middlewares ...HandlerFunc) {
+	g.middlewares = append(g.middlewares, middlewares...)
+}
+
+func (engine *Engine) ServerHTTP(w http.ResponseWriter, req *http.Request) {
+	middlewares := []HandlerFunc{}
+	for _, g := range engine.groups {
+		if strings.HasPrefix(req.URL.Path, g.prefix) {
+			middlewares = append(middlewares, g.middlewares...)
+		}
+	}
+	ctx := newContext(w, req)
+	ctx.handlers = middlewares
+	engine.router.handler(ctx)
 }
