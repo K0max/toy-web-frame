@@ -1,11 +1,23 @@
 package main
 
 import (
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"time"
 	"tinygin"
 )
+
+type student struct {
+	name string
+	age  int
+}
+
+func FormatAsDate(t time.Time) string {
+	y, m, d := t.Date()
+	return fmt.Sprintf("%d-%02d-%02d", y, m, d)
+}
 
 func onlyForV2() tinygin.HandlerFunc {
 	return func(c *tinygin.Context) {
@@ -87,20 +99,49 @@ func main() {
 	// r.Run(":9999")
 
 	// day5
+	// r := tinygin.New()
+	// r.Use(tinygin.Logger()) // global midlleware
+	// r.GET("/", func(c *tinygin.Context) {
+	// 	c.HTML(http.StatusOK, "<h1>Hello tinygin</h1>")
+	// })
+	//
+	// v2 := r.Group("/v2")
+	// v2.Use(onlyForV2()) // v2 group middleware
+	// {
+	// 	v2.GET("/hello/:name", func(c *tinygin.Context) {
+	// 		// expect /hello/tinyginktutu
+	// 		c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
+	// 	})
+	// }
+	// r.Run(":9999")
+
+	// day6
 	r := tinygin.New()
-	r.Use(tinygin.Logger()) // global midlleware
+	r.Use(tinygin.Logger())
+	r.SetFuncMap(template.FuncMap{
+		"FormatAsDate": FormatAsDate,
+	})
+	r.LoadHTMLGlob("templates/*")
+	r.Static("/assets", "./static")
+
+	stu1 := &student{name: "tinygin", age: 20}
+	stu2 := &student{name: "Jack", age: 22}
 	r.GET("/", func(c *tinygin.Context) {
-		c.HTML(http.StatusOK, "<h1>Hello tinygin</h1>")
+		c.HTML(http.StatusOK, "css.tmpl", nil)
+	})
+	r.GET("/students", func(c *tinygin.Context) {
+		c.HTML(http.StatusOK, "arr.tmpl", tinygin.H{
+			"title":  "tinygin",
+			"stuArr": [2]*student{stu1, stu2},
+		})
 	})
 
-	v2 := r.Group("/v2")
-	v2.Use(onlyForV2()) // v2 group middleware
-	{
-		v2.GET("/hello/:name", func(c *tinygin.Context) {
-			// expect /hello/tinyginktutu
-			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
+	r.GET("/date", func(c *tinygin.Context) {
+		c.HTML(http.StatusOK, "custom_func.tmpl", tinygin.H{
+			"title": "tinygin",
+			"now":   time.Date(2019, 8, 17, 0, 0, 0, 0, time.UTC),
 		})
-	}
+	})
 
 	r.Run(":9999")
 }
