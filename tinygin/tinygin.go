@@ -26,11 +26,17 @@ type RouterGroup struct {
 	middlewares []HandlerFunc
 }
 
-// New is the constructor of gee.Engine
-func New() *Engine {
+// NewEngine is the constructor of gee.Engine
+func NewEngine() *Engine {
 	engine := &Engine{router: newRouter()}
 	engine.RouterGroup = &RouterGroup{engine: engine}
 	engine.groups = []*RouterGroup{engine.RouterGroup}
+	return engine
+}
+
+func Default() *Engine {
+	engine := NewEngine()
+	engine.Use(Logger(), Recovery())
 	return engine
 }
 
