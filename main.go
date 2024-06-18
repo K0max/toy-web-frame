@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
 	"time"
@@ -32,7 +31,7 @@ func onlyForV2() tinygin.HandlerFunc {
 
 func main() {
 	// day 2
-	// r := tinygin.New()
+	// r := tinygin.NewEngine()
 	// r.GET("/", func(c *tinygin.Context) {
 	// 	c.HTML(http.StatusOK, "<h1>Hello tinygin</h1>")
 	// })
@@ -51,7 +50,7 @@ func main() {
 	// r.Run(":9999")
 
 	// day 3
-	// r := tinygin.New()
+	// r := tinygin.NewEngine()
 	// r.GET("/", func(c *tinygin.Context) {
 	// 	c.HTML(http.StatusOK, "<h1>Hello tinygin</h1>")
 	// })
@@ -73,7 +72,7 @@ func main() {
 	// r.Run(":9999")
 
 	// day 4
-	// r := tinygin.New()
+	// r := tinygin.NewEngine()
 	// r.GET("/", func(c *tinygin.Context) {
 	// 	c.HTML(http.StatusOK, "<h1>index</h1>")
 	// })
@@ -99,7 +98,7 @@ func main() {
 	// r.Run(":9999")
 
 	// day5
-	// r := tinygin.New()
+	// r := tinygin.NewEngine()
 	// r.Use(tinygin.Logger()) // global midlleware
 	// r.GET("/", func(c *tinygin.Context) {
 	// 	c.HTML(http.StatusOK, "<h1>Hello tinygin</h1>")
@@ -116,31 +115,43 @@ func main() {
 	// r.Run(":9999")
 
 	// day6
-	r := tinygin.New()
-	r.Use(tinygin.Logger())
-	r.SetFuncMap(template.FuncMap{
-		"FormatAsDate": FormatAsDate,
-	})
-	r.LoadHTMLGlob("templates/*")
-	r.Static("/assets", "./static")
+	// r := tinygin.NewEngine()
+	// r.Use(tinygin.Logger())
+	// r.SetFuncMap(template.FuncMap{
+	// 	"FormatAsDate": FormatAsDate,
+	// })
+	// r.LoadHTMLGlob("templates/*")
+	// r.Static("/assets", "./static")
+	//
+	// stu1 := &student{name: "tinygin", age: 20}
+	// stu2 := &student{name: "Jack", age: 22}
+	// r.GET("/", func(c *tinygin.Context) {
+	// 	c.HTML(http.StatusOK, "css.tmpl", nil)
+	// })
+	// r.GET("/students", func(c *tinygin.Context) {
+	// 	c.HTML(http.StatusOK, "arr.tmpl", tinygin.H{
+	// 		"title":  "tinygin",
+	// 		"stuArr": [2]*student{stu1, stu2},
+	// 	})
+	// })
+	//
+	// r.GET("/date", func(c *tinygin.Context) {
+	// 	c.HTML(http.StatusOK, "custom_func.tmpl", tinygin.H{
+	// 		"title": "tinygin",
+	// 		"now":   time.Date(2019, 8, 17, 0, 0, 0, 0, time.UTC),
+	// 	})
+	// })
+	// r.Run(":9999")
 
-	stu1 := &student{name: "tinygin", age: 20}
-	stu2 := &student{name: "Jack", age: 22}
+	// day7
+	r := tinygin.Default()
 	r.GET("/", func(c *tinygin.Context) {
-		c.HTML(http.StatusOK, "css.tmpl", nil)
+		c.String(http.StatusOK, "Hello tinyginktutu\n")
 	})
-	r.GET("/students", func(c *tinygin.Context) {
-		c.HTML(http.StatusOK, "arr.tmpl", tinygin.H{
-			"title":  "tinygin",
-			"stuArr": [2]*student{stu1, stu2},
-		})
-	})
-
-	r.GET("/date", func(c *tinygin.Context) {
-		c.HTML(http.StatusOK, "custom_func.tmpl", tinygin.H{
-			"title": "tinygin",
-			"now":   time.Date(2019, 8, 17, 0, 0, 0, 0, time.UTC),
-		})
+	// index out of range for testing Recovery()
+	r.GET("/panic", func(c *tinygin.Context) {
+		names := []string{"tinyginktutu"}
+		c.String(http.StatusOK, names[100])
 	})
 
 	r.Run(":9999")
