@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// HandlerFunc defines the request handler used by gee
+// HandlerFunc defines the request handler used by tinygin
 type HandlerFunc func(*Context)
 
 // Engine implement the interface of ServeHTTP
@@ -26,7 +26,7 @@ type RouterGroup struct {
 	middlewares []HandlerFunc
 }
 
-// NewEngine is the constructor of gee.Engine
+// NewEngine is the constructor of tinygin.Engine
 func NewEngine() *Engine {
 	engine := &Engine{router: newRouter()}
 	engine.RouterGroup = &RouterGroup{engine: engine}
